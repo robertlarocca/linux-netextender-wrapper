@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# Copyright (c) 2019-2021 Robert LaRocca https://www.laroccx.com
+
+# A shell script wrapper for Sonicwall netExtender.
+
+script_version='2.0.1'
+script_release='devel'	# options devel, beta, release
+
+alias sonicwall='netextender'
+
+display_help_information() {
+	cat <<-EOF_XYZ
+		help information goes here...
+	EOF_XYZ
+};
+
+display_version_information() {
+	cat <<-EOF_XYZ
+		version and copyright information goes here...
+	EOF_XYZ
+};
+
+main() {
+	# source the system-wide configuration
+	if [ -f /etc/netextender.conf ]; then
+		source /etc/netextender.conf
+	fi
+
+	# source the user configuration, this overrides system-wide file
+	if [ -f $HOME/.netextender.conf ]; then
+		source $HOME/.netextender.conf
+	fi
+
+	# if available include additional user options
+	local user_options="$@"
+
+	if [ -n "$user_options" ]; then
+		case "$1" in
+		-H | --help)
+			display_help_information
+			;;
+		-V | --version)
+			display_version_information
+			;;
+		*)
+			$netextender_binary \
+				$user_options \
+				--dns-prefer-remote \
+				--no-reconnect \
+				-u $username \
+				-d $domain \
+				-p $password \
+				$server_address:$service_port
+			;;
+		esac
+	fi
+};
+
+if [ -x "$(which netExtender)" ]; then
+	netextender_binary="$(which netExtender)"
+	main "$@"
+else
+	echo "netExtender: command not found"
+	exit 1
+fi
+
+exit 0
+

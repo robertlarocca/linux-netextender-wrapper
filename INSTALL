@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Copyright (c) 2021 Robert LaRocca https://www.laroccx.com
+
+# require root privileges
+require_root_privileges() {
+	if [ $(id -u) != 0 ]; then
+		logger -i "Error: $(basename $0 .sh) must be run as root!"
+		echo "Error: $(basename $0 .sh) must be run as root!"
+		exit 1
+	fi
+};
+
+#require_root_privileges
+
+main() {
+	# install netextender command
+	sudo cp -b -S .bak -v $PWD/netextender /usr/local/bin/
+	sudo chown root:root /usr/local/bin/netextender
+	sudo chmod 0755 /usr/local/bin/netextender
+
+	# create configuration file
+	cp -b -S .bak -v $PWD/netextender.conf $HOME/.netextender.conf
+	chmod 0600 $HOME/.netextender.conf
+};
+
+main "$@"
+
