@@ -4,66 +4,62 @@
 
 # A shell script wrapper for Sonicwall netExtender.
 
-script_version='2.0.1'
+script_version='2.0.5'
 script_release='devel'	# options devel, beta, release
-
-alias sonicwall='netextender'
 
 display_help_information() {
 	cat <<-EOF_XYZ
-		help information goes here...
+		$(basename $0): unrecognized option '$1'
+		Try 'netExtender --help' for more information.
 	EOF_XYZ
 };
 
 display_version_information() {
 	cat <<-EOF_XYZ
-		version and copyright information goes here...
+	$(basename $0) $script_version-$script_release
+	Copyright (c) 2019-$(date +%Y) Robert LaRocca, https://www.laroccx.com
+	License: The MIT License (MIT)
+	Source Code: https://github.com/robertlarocca/linux-netextender-wrapper
 	EOF_XYZ
 };
 
 main() {
 	# source the system-wide configuration
-	if [ -f /etc/netextender.conf ]; then
+	if [[ -f /etc/netextender.conf ]]; then
 		source /etc/netextender.conf
 	fi
 
 	# source the user configuration, this overrides system-wide file
-	if [ -f $HOME/.netextender.conf ]; then
+	if [[ -f $HOME/.netextender.conf ]]; then
 		source $HOME/.netextender.conf
 	fi
 
-	# if available include additional user options
+	# include additional user options
 	local user_options="$@"
 
-	if [ -n "$user_options" ]; then
-		case "$1" in
-		-H | --help)
-			display_help_information
-			;;
-		-V | --version)
-			display_version_information
-			;;
-		*)
-			$netextender_binary \
-				$user_options \
-				--dns-prefer-remote \
-				--no-reconnect \
-				-u $username \
-				-d $domain \
-				-p $password \
-				$server_address:$service_port
-			;;
-		esac
-	fi
+	case "$1" in
+	-H | --help)
+		display_help_information "$1"
+		;;
+	-V | --version)
+		display_version_information
+		;;
+	*)
+		$(which netExtender) \
+			-u $username \
+			-d $domain \
+			-p $password \
+			--dns-prefer-remote \
+			--no-reconnect \
+			$user_options \
+			$server_address:$service_port
+		;;
+	esac
 };
 
-if [ -x "$(which netExtender)" ]; then
-	netextender_binary="$(which netExtender)"
-	main "$@"
+if [[ -x "$(which netExtender)" ]]; then
+	main "$@" &
 else
 	echo "netExtender: command not found"
 	exit 1
 fi
-
-exit 0
-

@@ -20,8 +20,10 @@ main() {
 	sudo chmod 0755 /usr/local/bin/netextender
 
 	# create configuration file
-	cp -b -S .bak -v $PWD/netextender.conf $HOME/.netextender.conf
-	chmod 0600 $HOME/.netextender.conf
+	if [[ ! -f $HOME/.netextender.conf ]]; then
+		cp -b -S .bak -v $PWD/netextender.conf $HOME/.netextender.conf
+		chmod 0600 $HOME/.netextender.conf
+	fi
 };
 
 main "$@"
